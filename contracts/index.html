@@ -12,17 +12,32 @@
 
   <style>
     @font-face {
-        font-family: 'PublicoHeadline';
-        src: url('https://www.cbsnews.com/fly/bundles/cbsnewscontent/fonts/PublicoHeadline-Black/PublicoHeadline-Black.woff2') format('woff2');
-        font-weight: bold;
-        font-style: normal;
-      }
-    body { font-family: "proxima-nova", sans-serif; padding: 1em; }
-    table { width: 100%; }
-    h2 { font-family: "PublicoHeadline", sans-serif; font-size: 1.5em; margin-bottom: 0.5em; }
-    button { font-family: "proxima-nova", sans-serif; font-size: 0.8rem }
-    
-    /* Tooltip box styles */
+      font-family: 'PublicoHeadline';
+      src: url('https://www.cbsnews.com/fly/bundles/cbsnewscontent/fonts/PublicoHeadline-Black/PublicoHeadline-Black.woff2') format('woff2');
+      font-weight: bold;
+      font-style: normal;
+    }
+
+    body {
+      font-family: "proxima-nova", sans-serif;
+      padding: 1em;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    h2 {
+      font-family: "PublicoHeadline", sans-serif;
+      font-size: 1.5em;
+      margin-bottom: 0.5em;
+    }
+
+    button {
+      font-family: "proxima-nova", sans-serif;
+      font-size: 0.8rem;
+    }
+
     .tooltip-box {
       position: absolute;
       background: #333;
@@ -39,16 +54,15 @@
     }
 
     td.limited-column {
-      max-width: 300px; /* adjust to what looks good */
+      max-width: 300px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-  /* Ensure proper scrolling behavior */
     #contracts-table {
       width: 100%;
-      overflow-x: auto; /* Make sure horizontal scrolling works */
+      overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
   </style>
@@ -86,16 +100,17 @@
 <!-- PapaParse for CSV -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-<script>
-  // Get today's date in MMDDYYYY format
-  const today = new Date();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-  const day = String(today.getDate()).padStart(2, '0');
-  const year = String(today.getFullYear())
-  const today_str = month + day + year
-  console.log("Today's date: " + today_str)
+<!-- Pym.js for responsive iframe embedding -->
+<script src="https://pym.nprapps.org/pym.v1.min.js"></script>
 
-  const csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${today_str}.csv`
+<script>
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const year = String(today.getFullYear());
+  const today_str = month + day + year;
+
+  const csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${today_str}.csv`;
 
   function formatMoney(val) {
     const num = parseFloat(val);
@@ -106,7 +121,7 @@
     download: true,
     header: true,
     complete: function(results) {
-      const data = results.data.filter(row => Object.values(row).some(cell => cell)); // Filter out empty rows
+      const data = results.data.filter(row => Object.values(row).some(cell => cell));
       const tbody = $('#contracts-table tbody');
       data.forEach(row => {
         tbody.append(`
@@ -127,13 +142,13 @@
       $('#contracts-table').DataTable({
         responsive: true,
         autoWidth: false,
-        pageLength: 10,                // Default number of rows to show
-        lengthMenu: [10, 25, 50, 100], // Show dropdown with these options
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
         scrollX: true,
         dom: 'Bfrtip',
         columnDefs: [
           { targets: '_all', className: 'dt-nowrap' },
-          { targets: [1, 2, 3], className: 'limited-column' },        // Agency + Vendor
+          { targets: [1, 2, 3], className: 'limited-column' },
         ],
         buttons: [
           {
@@ -158,10 +173,17 @@
       });
 
       $('#last-updated').text(`Last updated: ${formattedEt} ET`);
-      }
-    });
 
-    $(document).on('mouseenter', 'td.limited-column, td.description-column', function (e) {
+      // Tell pym parent to resize iframe
+      if (window.pymChild) {
+        window.pymChild.sendHeight();
+      } else {
+        window.pymChild = new pym.Child({ polling: 500 });
+      }
+    }
+  });
+
+  $(document).on('mouseenter', 'td.limited-column, td.description-column', function (e) {
     const $cell = $(this);
     if (this.offsetWidth < this.scrollWidth) {
       const tooltip = $('<div class="tooltip-box"></div>').text($cell.text());
