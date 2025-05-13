@@ -61,14 +61,14 @@
 <table id="contracts-table" class="display nowrap" style="width:100%">
   <thead>
     <tr>
-      <th>PIID</th>
       <th>Agency</th>
       <th>Vendor</th>
       <th>Description</th>
-      <th>FPDS Link</th>
       <th>Value</th>
       <th>Savings</th>
+      <th>FPDS Link</th>
       <th>Date Canceled</th>
+      <th>PIID</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -113,14 +113,14 @@
       data.forEach(row => {
         tbody.append(`
           <tr>
-            <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
             <td>${row.agency.toUpperCase()}</td>
             <td>${row.vendor === 'Unavailable' ? 'Not disclosed' : row.vendor}</td>
             <td>${row.description === 'Unavailable for legal reasons' ? 'Not disclosed' : row.description}</td>
-            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${formatMoney(row.value)}</td>
             <td>${formatMoney(row.savings)}</td>
+            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${row.deleted_date}</td>
+            <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
           </tr>
         `);
       });
