@@ -68,15 +68,12 @@
 <table id="Leases-table" class="display nowrap" style="width:100%">
   <thead>
     <tr>
-      <th>PIID</th>
       <th>Agency</th>
-      <th>Vendor</th>
+      <th>Location</th>
       <th>Value</th>
-      <th>Description</th>
-      <th>Status</th>
-      <th>FPDS Link</th>
-      <th>Deleted Date</th>
       <th>Savings</th>
+      <th>Description</th>
+      <th>Deleted Date</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -118,15 +115,12 @@
       data.forEach(row => {
         tbody.append(`
           <tr>
-            <td>${row.piid}</td>
             <td>${row.agency.toUpperCase()}</td>
-            <td>${row.vendor.toUpperCase()}</td>
+            <td>${row.location}</td>
             <td>${formatMoney(row.value)}</td>
-            <td>${row.description}</td>
-            <td>${row.fpds_status}</td>
-            <td><a href="${row.fpds_link}" target="_blank">View</a></td>
-            <td>${row.deleted_date}</td>
             <td>${formatMoney(row.savings)}</td>
+            <td>${row.description}</td>
+            <td>${row.deleted_date}</td>
           </tr>
         `);
       });
