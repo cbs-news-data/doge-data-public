@@ -8,6 +8,7 @@
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+  <link rel="stylesheet" href="https://use.typekit.net/nky4zkf.css">
 
   <style>
     @font-face {
@@ -16,13 +17,10 @@
         font-weight: bold;
         font-style: normal;
       }
-    body { font-family: "proxima-nova" sans-serif; padding: 1em; }
+    body { font-family: "proxima-nova", sans-serif; padding: 1em; }
     table { width: 100%; }
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      th { font-weight: bold; }
-      td { border-top: 1px solid #ccc; padding: 5px 0; }
-    }
+    h2 { font-family: "PublicoHeadline", sans-serif; font-size: 1.5em; margin-bottom: 0.5em; }
+    button { font-family: "proxima-nova", sans-serif; font-size: 0.8rem }
     
     /* Tooltip box styles */
     .tooltip-box {
@@ -40,23 +38,18 @@
       white-space: normal;
     }
 
-    /* Fix the download button and dropdown position */
-    .dt-buttons {
-      margin-bottom: 10px;
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-    }
-    
-    .dt-buttons .btn {
-      margin-right: 10px;
-    }
-
     td.limited-column {
       max-width: 300px; /* adjust to what looks good */
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+  /* Ensure proper scrolling behavior */
+    #grants-table {
+      width: 100%;
+      overflow-x: auto; /* Make sure horizontal scrolling works */
+      -webkit-overflow-scrolling: touch;
     }
   </style>
 </head>
@@ -65,16 +58,16 @@
 <h2>Grants DOGE says it has canceled</h2>
 <p id="last-updated" style="font-size: 0.9em; color: #555;"></p>
 
-<table id="Grants-table" class="display nowrap" style="width:100%">
+<table id="grants-table" class="display nowrap" style="width:100%">
   <thead>
     <tr>
       <th>Agency</th>
       <th>Recipient</th>
       <th>Description</th>
+      <th>USA Spending Link</th>
       <th>Value</th>
       <th>Savings</th>
-      <th>USA Spending Link</th>
-      <th>Deleted Date</th>
+      <th>Date Canceled</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -112,29 +105,30 @@
     header: true,
     complete: function(results) {
       const data = results.data.filter(row => Object.values(row).some(cell => cell)); // Filter out empty rows
-      const tbody = $('#Grants-table tbody');
+      const tbody = $('#grants-table tbody');
       data.forEach(row => {
         tbody.append(`
           <tr>
             <td>${row.agency.toUpperCase()}</td>
             <td>${row.recipient.toUpperCase()}</td>
-            <td>${row.description}</td>
+            <td>${row.description === 'Currently unavailable' ? 'Not disclosed' : row.description}</td>
+            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${formatMoney(row.value)}</td>
             <td>${formatMoney(row.savings)}</td>
-            <td><a href="${row.link}" target="_blank">View</a></td>
             <td>${row.date}</td>
           </tr>
         `);
       });
 
-      $('#Grants-table').DataTable({
+      $('#grants-table').DataTable({
         responsive: true,
-        autowidth: false,
+        autoWidth: false,
         pageLength: 10,                // Default number of rows to show
-        lengthMenu: [10, 25, 50, 100], // Show dropdown with these options
+        scrollX: true,
+        dom: 'Bfrtip',
         columnDefs: [
           { targets: '_all', className: 'dt-nowrap' },
-          { targets: [1, 2, 4], className: 'limited-column' },        // Agency + Vendor
+          { targets: [1, 2, 3], className: 'limited-column' },        // Agency + Vendor
         ],
         buttons: [
           {
@@ -159,16 +153,6 @@
       });
 
       $('#last-updated').text(`Last updated: ${formattedEt} ET`);
-
-      const downloadButton = new $.fn.dataTable.Buttons($('#Grants-table').DataTable(), {
-          buttons: [
-            {
-              extend: 'csv',
-              text: 'Download the data',
-              className: 'btn btn-primary'
-            }
-          ]
-        }).container().appendTo('#Grants-table_wrapper .dataTables_info');
       }
     });
 

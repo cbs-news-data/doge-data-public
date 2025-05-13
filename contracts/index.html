@@ -63,7 +63,7 @@
     <tr>
       <th>PIID</th>
       <th>Agency</th>
-      <th>Recipient</th>
+      <th>Vendor</th>
       <th>Description</th>
       <th>FPDS Link</th>
       <th>Value</th>
@@ -110,11 +110,11 @@
       data.forEach(row => {
         tbody.append(`
           <tr>
-            <td>${row.piid}</td>
+            <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
             <td>${row.agency.toUpperCase()}</td>
-            <td>${row.vendor.toUpperCase()}</td>
-            <td>${row.description}</td>
-            <td><a href="${row.fpds_link}" target="_blank">View</a></td>
+            <td>${row.vendor === 'Unavailable' ? 'Not disclosed' : row.vendor}</td>
+            <td>${row.description === 'Unavailable for legal reasons' ? 'Not disclosed' : row.description}</td>
+            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${formatMoney(row.value)}</td>
             <td>${formatMoney(row.savings)}</td>
             <td>${row.deleted_date}</td>
