@@ -118,7 +118,7 @@
             <td>${row.description === 'Unavailable for legal reasons' ? 'Not disclosed' : row.description}</td>
             <td>${formatMoney(row.value)}</td>
             <td>${formatMoney(row.savings)}</td>
-            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
+            <td>${row.fpds_link ? `<a href="${row.fpds_link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${row.deleted_date}</td>
             <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
           </tr>
