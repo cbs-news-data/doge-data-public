@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Searchable Contracts Table</title>
+  <title>Searchable Grants Table</title>
 
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
@@ -62,10 +62,10 @@
 </head>
 <body>
 
-<h2>Contracts DOGE says it has canceled</h2>
+<h2>Grants DOGE says it has canceled</h2>
 <p id="last-updated" style="font-size: 0.9em; color: #555;"></p>
 
-<table id="contracts-table" class="display nowrap" style="width:100%">
+<table id="Grants-table" class="display nowrap" style="width:100%">
   <thead>
     <tr>
       <th>PIID</th>
@@ -102,7 +102,7 @@
   const today_str = month + day + year
   console.log("Today's date: " + today_str)
 
-  const csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${today_str}.csv`
+  const csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/Grants_doge_${today_str}.csv`
 
   function formatMoney(val) {
     const num = parseFloat(val);
@@ -114,7 +114,7 @@
     header: true,
     complete: function(results) {
       const data = results.data.filter(row => Object.values(row).some(cell => cell)); // Filter out empty rows
-      const tbody = $('#contracts-table tbody');
+      const tbody = $('#Grants-table tbody');
       data.forEach(row => {
         tbody.append(`
           <tr>
@@ -131,7 +131,7 @@
         `);
       });
 
-      $('#contracts-table').DataTable({
+      $('#Grants-table').DataTable({
         responsive: true,
         autowidth: false,
         pageLength: 10,                // Default number of rows to show
@@ -164,7 +164,7 @@
 
       $('#last-updated').text(`Last updated: ${formattedEt} ET`);
 
-      const downloadButton = new $.fn.dataTable.Buttons($('#contracts-table').DataTable(), {
+      const downloadButton = new $.fn.dataTable.Buttons($('#Grants-table').DataTable(), {
           buttons: [
             {
               extend: 'csv',
@@ -172,7 +172,7 @@
               className: 'btn btn-primary'
             }
           ]
-        }).container().appendTo('#contracts-table_wrapper .dataTables_info');
+        }).container().appendTo('#Grants-table_wrapper .dataTables_info');
       }
     });
 
