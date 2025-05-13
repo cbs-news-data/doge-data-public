@@ -64,9 +64,9 @@
       <th>Agency</th>
       <th>Recipient</th>
       <th>Description</th>
-      <th>USA Spending Link</th>
       <th>Value</th>
       <th>Savings</th>
+      <th>USA Spending Link</th>
       <th>Date Canceled</th>
     </tr>
   </thead>
@@ -115,9 +115,9 @@
             <td>${row.agency.toUpperCase()}</td>
             <td>${row.recipient.toUpperCase()}</td>
             <td>${row.description === 'Currently unavailable' ? 'Not disclosed' : row.description}</td>
-            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${formatMoney(row.value)}</td>
             <td>${formatMoney(row.savings)}</td>
+            <td>${row.link ? `<a href="${row.link}" target="_blank">View</a>` : 'Not disclosed'}</td>
             <td>${row.date}</td>
           </tr>
         `);
