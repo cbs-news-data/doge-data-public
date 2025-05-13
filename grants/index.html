@@ -138,21 +138,14 @@
           }
         ]
       });
-
-      const nowUtc = new Date();
-      const nowEt = new Date(nowUtc.toLocaleString("en-US", { timeZone: "America/New_York" }));
-
-      const formattedEt = nowEt.toLocaleString("en-US", {
-        timeZone: "America/New_York",
+      
+      const formattedDate = today.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
+        day: 'numeric'
       });
 
-      $('#last-updated').text(`Last updated: ${formattedEt} ET`);
+      $('#last-updated').text(`Last updated: ${formattedDate} 7:00 AM ET`);
       }
     });
 
