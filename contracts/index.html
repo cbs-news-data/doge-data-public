@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Searchable Contracts Table</title>
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+
+  <style>
+    @font-face {
+        font-family: 'PublicoHeadline';
+        src: url('https://www.cbsnews.com/fly/bundles/cbsnewscontent/fonts/PublicoHeadline-Black/PublicoHeadline-Black.woff2') format('woff2');
+        font-weight: bold;
+        font-style: normal;
+      }
+    body { font-family: "proxima-nova" sans-serif; padding: 1em; }
+    table { width: 100%; }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      th { font-weight: bold; }
+      td { border-top: 1px solid #ccc; padding: 5px 0; }
+    }
+    
+    /* Tooltip box styles */
+    .tooltip-box {
+      position: absolute;
+      background: #333;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      max-width: 300px;
+      z-index: 1000;
+      font-size: 0.9em;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      white-space: normal;
+    }
+
+    /* Fix the download button and dropdown position */
+    .dt-buttons {
+      margin-bottom: 10px;
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+    }
+    
+    .dt-buttons .btn {
+      margin-right: 10px;
+    }
+
+    td.limited-column {
+      max-width: 300px; /* adjust to what looks good */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Contracts DOGE says it has canceled</h2>
+<p id="last-updated" style="font-size: 0.9em; color: #555;"></p>
+
+<table id="contracts-table" class="display nowrap" style="width:100%">
+  <thead>
+    <tr>
+      <th>PIID</th>
+      <th>Agency</th>
+      <th>Vendor</th>
+      <th>Value</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>FPDS Link</th>
+      <th>Deleted Date</th>
+      <th>Savings</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- jQuery + DataTables + Buttons -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<!-- PapaParse for CSV -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<script>
+  // Get today's date in MMDDYYYY format
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const day = String(today.getDate()).padStart(2, '0');
+  const year = String(today.getFullYear())
+  const today_str = month + day + year
+  console.log("Today's date: " + today_str)
+
+  const csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${today_str}.csv`
+
+  function formatMoney(val) {
+    const num = parseFloat(val);
+    return isNaN(num) ? "" : "$" + num.toLocaleString("en-US");
+  }
+
+  Papa.parse(csvUrl, {
+    download: true,
+    header: true,
+    complete: function(results) {
+      const data = results.data.filter(row => Object.values(row).some(cell => cell)); // Filter out empty rows
+      const tbody = $('#contracts-table tbody');
+      data.forEach(row => {
+        tbody.append(`
+          <tr>
+            <td>${row.piid}</td>
+            <td>${row.agency.toUpperCase()}</td>
+            <td>${row.vendor.toUpperCase()}</td>
+            <td>${formatMoney(row.value)}</td>
+            <td>${row.description}</td>
+            <td>${row.fpds_status}</td>
+            <td><a href="${row.fpds_link}" target="_blank">View</a></td>
+            <td>${row.deleted_date}</td>
+            <td>${formatMoney(row.savings)}</td>
+          </tr>
+        `);
+      });
+
+      $('#contracts-table').DataTable({
+        responsive: true,
+        autowidth: false,
+        pageLength: 10,                // Default number of rows to show
+        lengthMenu: [10, 25, 50, 100], // Show dropdown with these options
+        columnDefs: [
+          { targets: '_all', className: 'dt-nowrap' },
+          { targets: [1, 2, 4], className: 'limited-column' },        // Agency + Vendor
+        ],
+        buttons: [
+          {
+            extend: 'csv',
+            text: 'Download the data',
+            className: 'btn btn-primary'
+          }
+        ]
+      });
+
+      const nowUtc = new Date();
+      const nowEt = new Date(nowUtc.toLocaleString("en-US", { timeZone: "America/New_York" }));
+
+      const formattedEt = nowEt.toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      $('#last-updated').text(`Last updated: ${formattedEt} ET`);
+
+      const downloadButton = new $.fn.dataTable.Buttons($('#contracts-table').DataTable(), {
+          buttons: [
+            {
+              extend: 'csv',
+              text: 'Download the data',
+              className: 'btn btn-primary'
+            }
+          ]
+        }).container().appendTo('#contracts-table_wrapper .dataTables_info');
+      }
+    });
+
+    $(document).on('mouseenter', 'td.limited-column, td.description-column', function (e) {
+    const $cell = $(this);
+    if (this.offsetWidth < this.scrollWidth) {
+      const tooltip = $('<div class="tooltip-box"></div>').text($cell.text());
+      $('body').append(tooltip);
+      tooltip.css({
+        top: e.pageY + 10 + 'px',
+        left: e.pageX + 10 + 'px',
+        opacity: 1
+      });
+      $cell.data('tooltip', tooltip);
+    }
+  });
+
+  $(document).on('mousemove', 'td.limited-column, td.description-column', function (e) {
+    const tooltip = $(this).data('tooltip');
+    if (tooltip) {
+      tooltip.css({
+        top: e.pageY + 10 + 'px',
+        left: e.pageX + 10 + 'px'
+      });
+    }
+  });
+
+  $(document).on('mouseleave', 'td.limited-column, td.description-column', function () {
+    const tooltip = $(this).data('tooltip');
+    if (tooltip) {
+      tooltip.remove();
+      $(this).removeData('tooltip');
+    }
+  });
+</script>
+
+</body>
+</html>
