@@ -84,6 +84,9 @@
 <!-- PapaParse for CSV -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
+<!-- Pym.js for responsive iframe embedding -->
+<script src="https://pym.nprapps.org/pym.v1.min.js"></script>
+
 <script>
   // Get today's date in MMDDYYYY format
   const today = new Date();
@@ -145,8 +148,16 @@
         day: 'numeric'
       });
 
+
       $('#last-updated').text(`Last updated: ${formattedDate} 7:00 AM ET`);
+
+             // Tell pym parent to resize iframe
+      if (window.pymChild) {
+        window.pymChild.sendHeight();
+      } else {
+        window.pymChild = new pym.Child({ polling: 500 });
       }
+    },
     });
 
     $(document).on('mouseenter', 'td.limited-column, td.description-column', function (e) {
