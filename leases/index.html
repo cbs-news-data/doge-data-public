@@ -51,6 +51,29 @@
       overflow-x: auto; /* Make sure horizontal scrolling works */
       -webkit-overflow-scrolling: touch;
     }
+
+    /* Loading spinner */
+    #loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3em 0;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -58,7 +81,12 @@
 <h2>Leases</h2>
 <p id="last-updated" style="font-size: 0.9em; color: #555;"></p>
 
-<table id="leases-table" class="display nowrap" style="width:100%">
+<div id="loading-spinner">
+  <div class="spinner"></div>
+  <p style="margin-top: 1em; color: #666;">Loading data...</p>
+</div>
+
+<table id="leases-table" class="display nowrap" style="width:100%; display:none;">
   <thead>
     <tr>
       <th>Agency</th>
@@ -127,15 +155,20 @@
           `);
         });
 
+        $('#loading-spinner').hide();
+        $('#leases-table').show();
+
         $('#leases-table').DataTable({
           responsive: true,
           autoWidth: false,
-          pageLength: 10,                // Default number of rows to show
+          pageLength: 10,
           scrollX: true,
+          deferRender: true,    // Only render visible rows - huge performance boost
+          processing: true,      // Show processing indicator
           dom: 'Bfrtip',
           columnDefs: [
             { targets: '_all', className: 'dt-nowrap' },
-            { targets: [0, 6], className: 'limited-column' },        // Agency + Vendor
+            { targets: [0, 6], className: 'limited-column' },
           ],
           buttons: [
             {
