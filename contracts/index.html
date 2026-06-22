@@ -97,69 +97,88 @@
   const today_str = month + day + year
   console.log("Today's date: " + today_str)
 
-  const csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${today_str}.csv`
+  // Latest available data date as fallback
+  const fallback_str = "06132026"
+  let csvUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${today_str}.csv`
+  let actualDate = today_str;
 
   function formatMoney(val) {
     const num = parseFloat(val);
     return isNaN(num) ? "" : "$" + num.toLocaleString("en-US");
   }
 
-  Papa.parse(csvUrl, {
-    download: true,
-    header: true,
-    complete: function(results) {
-      const data = results.data.filter(row => Object.values(row).some(cell => cell)); // Filter out empty rows
-      const tbody = $('#contracts-table tbody');
-      data.forEach(row => {
-        tbody.append(`
-          <tr>
-            <td>${row.agency.toUpperCase()}</td>
-            <td>${row.vendor === 'Unavailable' ? 'Not disclosed' : row.vendor}</td>
-            <td>${row.description === 'Unavailable for legal reasons' ? 'Not disclosed' : row.description}</td>
-            <td>${formatMoney(row.value)}</td>
-            <td>${formatMoney(row.savings)}</td>
-            <td>${row.fpds_link ? `<a href="${row.fpds_link}" target="_blank">View</a>` : 'Not disclosed'}</td>
-            <td>${row.deleted_date}</td>
-            <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
-          </tr>
-        `);
-      });
+  function loadData(url, dateStr) {
+    Papa.parse(url, {
+      download: true,
+      header: true,
+      complete: function(results) {
+        const data = results.data.filter(row => Object.values(row).some(cell => cell)); // Filter out empty rows
+        const tbody = $('#contracts-table tbody');
+        data.forEach(row => {
+          tbody.append(`
+            <tr>
+              <td>${row.agency.toUpperCase()}</td>
+              <td>${row.vendor === 'Unavailable' ? 'Not disclosed' : row.vendor}</td>
+              <td>${row.description === 'Unavailable for legal reasons' ? 'Not disclosed' : row.description}</td>
+              <td>${formatMoney(row.value)}</td>
+              <td>${formatMoney(row.savings)}</td>
+              <td>${row.fpds_link ? `<a href="${row.fpds_link}" target="_blank">View</a>` : 'Not disclosed'}</td>
+              <td>${row.deleted_date}</td>
+              <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
+            </tr>
+          `);
+        });
 
-      $('#contracts-table').DataTable({
-        responsive: true,
-        autoWidth: false,
-        pageLength: 10,                // Default number of rows to show
-        scrollX: true,
-        dom: 'Bfrtip',
-        columnDefs: [
-          { targets: '_all', className: 'dt-nowrap' },
-          { targets: [0, 1, 2], className: 'limited-column' },        // Agency + Vendor
-        ],
-        buttons: [
-          {
-            extend: 'csv',
-            text: 'Download the data',
-            className: 'btn btn-primary'
-          }
-        ]
-      });
+        $('#contracts-table').DataTable({
+          responsive: true,
+          autoWidth: false,
+          pageLength: 10,                // Default number of rows to show
+          scrollX: true,
+          dom: 'Bfrtip',
+          columnDefs: [
+            { targets: '_all', className: 'dt-nowrap' },
+            { targets: [0, 1, 2], className: 'limited-column' },        // Agency + Vendor
+          ],
+          buttons: [
+            {
+              extend: 'csv',
+              text: 'Download the data',
+              className: 'btn btn-primary'
+            }
+          ]
+        });
 
-      const formattedDate = today.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+        const displayDate = new Date(dateStr.substring(4, 8), dateStr.substring(0, 2) - 1, dateStr.substring(2, 4));
+        const formattedDate = displayDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
 
-      $('#last-updated').text(`Last updated: ${formattedDate} 7:00 AM ET.`);
+        $('#last-updated').text(`Last updated: ${formattedDate} 7:00 AM ET.`);
 
-       // Tell pym parent to resize iframe
-      if (window.pymChild) {
-        window.pymChild.sendHeight();
-      } else {
-        window.pymChild = new pym.Child({ polling: 500 });
+         // Tell pym parent to resize iframe
+        if (window.pymChild) {
+          window.pymChild.sendHeight();
+        } else {
+          window.pymChild = new pym.Child({ polling: 500 });
+        }
+      },
+      error: function(err) {
+        console.log('Error loading data for ' + dateStr + ', trying fallback...');
+        if (dateStr !== fallback_str) {
+          const fallbackUrl = `https://raw.githubusercontent.com/cbs-news-data/doge-data-public/main/data-outputs/contracts_doge_${fallback_str}.csv`;
+          loadData(fallbackUrl, fallback_str);
+        } else {
+          console.error('Failed to load fallback data');
+          $('body').append('<p style="color: red; text-align: center;">Error loading data. Please try again later.</p>');
+        }
       }
-    },
     });
+  }
+
+  // Try loading today's data first
+  loadData(csvUrl, actualDate);
 
     $(document).on('mouseenter', 'td.limited-column, td.description-column', function (e) {
     const $cell = $(this);
