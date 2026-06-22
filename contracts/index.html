@@ -79,7 +79,7 @@
 <body>
 
 <h2>Contracts</h2>
-<p id="last-updated" style="font-size: 0.9em; color: #555;"> FPDS stands for Federal Procurement Data System, a federal procurement database.</p>
+<p id="last-updated" style="font-size: 0.9em; color: #555;"></p>
 
 <div id="loading-spinner">
   <div class="spinner"></div>
@@ -94,7 +94,6 @@
       <th>Description</th>
       <th>Value</th>
       <th>Savings</th>
-      <th>FPDS Link</th>
       <th>Date Canceled</th>
       <th>PIID</th>
     </tr>
@@ -150,7 +149,6 @@
               <td>${row.description === 'Unavailable for legal reasons' ? 'Not disclosed' : row.description}</td>
               <td>${formatMoney(row.value)}</td>
               <td>${formatMoney(row.savings)}</td>
-              <td>${row.fpds_link ? `<a href="${row.fpds_link}" target="_blank">View</a>` : 'Not disclosed'}</td>
               <td>${row.deleted_date}</td>
               <td>${row.piid === 'Unavailable' ? 'Not disclosed' : row.piid}</td>
             </tr>
